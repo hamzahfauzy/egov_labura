@@ -1,8 +1,11 @@
 package com.egovlabura;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
@@ -33,6 +36,15 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         setContentView(R.layout.activity_main);
 
+        int PERMISSION_ALL = 1;
+        String[] PERMISSIONS = {
+                android.Manifest.permission.ACCESS_FINE_LOCATION,
+                android.Manifest.permission.CAMERA
+        };
+
+        if (!hasPermissions(this, PERMISSIONS)) {
+            ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
+        }
 
         spinner = (ProgressBar)findViewById(R.id.progressBar);
 
@@ -137,4 +149,16 @@ public class MainActivity extends AppCompatActivity {
         }
         return super.onKeyDown(keyCode, event);
     }
+
+    public static boolean hasPermissions(Context context, String... permissions) {
+        if (context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 }
