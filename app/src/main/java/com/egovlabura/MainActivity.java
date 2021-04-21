@@ -3,6 +3,7 @@ package com.egovlabura;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -20,6 +21,8 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 
+import java.util.Arrays;
+
 public class MainActivity extends AppCompatActivity {
 
     private String TAG = "WV";
@@ -36,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         setContentView(R.layout.activity_main);
 
+        spinner = (ProgressBar)findViewById(R.id.progressBar);
+
         int PERMISSION_ALL = 1;
         String[] PERMISSIONS = {
                 android.Manifest.permission.ACCESS_FINE_LOCATION,
@@ -45,9 +50,14 @@ public class MainActivity extends AppCompatActivity {
         if (!hasPermissions(this, PERMISSIONS)) {
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
         }
+        else
+        {
+            init();
+        }
+    }
 
-        spinner = (ProgressBar)findViewById(R.id.progressBar);
-
+    void init()
+    {
         GPSTracker gps = new GPSTracker(MainActivity.this);
 
         // Check if GPS enabled
@@ -159,6 +169,16 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == 1) {
+            if (!Arrays.asList(grantResults).contains(PackageManager.PERMISSION_DENIED)) {
+                //all permissions have been granted
+                init();
+            }
+        }
     }
 
 }
