@@ -3,9 +3,9 @@ package com.egovlabura;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Build;
@@ -20,6 +20,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import java.util.Arrays;
 
@@ -58,23 +59,6 @@ public class MainActivity extends AppCompatActivity {
 
     void init()
     {
-        GPSTracker gps = new GPSTracker(MainActivity.this);
-
-        // Check if GPS enabled
-        if(gps.canGetLocation()) {
-            latitude = gps.getLatitude();
-            longitude = gps.getLongitude();
-
-
-            // \n is for new line
-//            Toast.makeText(MainActivity.this, "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
-        } else {
-            // Can't get location.
-            // GPS or network is not enabled.
-            // Ask user to enable GPS/network in settings.
-            gps.showSettingsAlert();
-        }
-
         myWebView = (WebView) findViewById(R.id.webview);
         myWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
         myWebView.getSettings().setJavaScriptEnabled(true);
@@ -105,7 +89,19 @@ public class MainActivity extends AppCompatActivity {
                 if(pageStarted)
                     spinner.setVisibility(View.GONE);
                 pageStarted = false;
-                view.loadUrl("javascript:startMedia({lat:"+latitude+",lng:"+longitude+"})");
+                if(url.contains("https://absensi-ng.labura.go.id/absen/wajah")) {
+                    GPSTracker gps = new GPSTracker(MainActivity.this);
+
+                    // Check if GPS enabled
+                    if(gps.canGetLocation()) {
+                        latitude = gps.getLatitude();
+                        longitude = gps.getLongitude();
+                        Toast.makeText(MainActivity.this, "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
+                    } else {
+                        gps.showSettingsAlert();
+                    }
+                    view.loadUrl("javascript:startMedia({lat:" + latitude + ",lng:" + longitude + "})");
+                }
             }
         });
         myWebView.setWebChromeClient(new WebChromeClient() {
@@ -118,13 +114,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Log.d(TAG, request.getOrigin().toString());
-                        if(request.getOrigin().toString().equals("https://absensi-ng.labura.go.id/")) {
-                            Log.d(TAG, "GRANTED");
-                            request.grant(request.getResources());
-                        } else {
-                            Log.d(TAG, "DENIED");
-                            request.deny();
-                        }
+                        request.grant(request.getResources());
                     }
                 });
             }

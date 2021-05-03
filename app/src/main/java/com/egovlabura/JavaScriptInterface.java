@@ -1,6 +1,7 @@
 package com.egovlabura;
 
 import android.content.Context;
+import android.content.Intent;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
@@ -16,6 +17,21 @@ public class JavaScriptInterface {
     @JavascriptInterface
     public void showToast(String toast) {
         Toast.makeText(mContext, toast, Toast.LENGTH_SHORT).show();
+    }
+
+    @JavascriptInterface
+    public String Hello()
+    {
+        return "Hello World";
+    }
+
+    public void openLocalCamera()
+    {
+//        try {
+//            mContext.startActivity(new Intent(MainActivity.this, CameraActivity.class));
+//        } catch(Exception ex) {
+//
+//        }
     }
 
     public void calculateLocation()
