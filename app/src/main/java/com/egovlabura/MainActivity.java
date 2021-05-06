@@ -8,8 +8,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -31,7 +33,6 @@ public class MainActivity extends AppCompatActivity {
     GPSTracker gps;
     double latitude, longitude;
     ProgressBar spinner;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,16 +92,22 @@ public class MainActivity extends AppCompatActivity {
                 pageStarted = false;
                 if(url.contains("https://absensi-ng.labura.go.id/absen/wajah")) {
                     GPSTracker gps = new GPSTracker(MainActivity.this);
-
+                    Location location;
                     // Check if GPS enabled
                     if(gps.canGetLocation()) {
-                        latitude = gps.getLatitude();
-                        longitude = gps.getLongitude();
-                        Toast.makeText(MainActivity.this, "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
+                        location = gps.getLocation();
+                        if(location.isFromMockProvider())
+                            Toast.makeText(MainActivity.this, "Error Code Mock Location", Toast.LENGTH_LONG).show();
+                        else
+                        {
+                            latitude = gps.getLatitude();
+                            longitude = gps.getLongitude();
+//                            Toast.makeText(MainActivity.this, "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
+                            view.loadUrl("javascript:startMedia({lat:" + latitude + ",lng:" + longitude + "})");
+                        }
                     } else {
                         gps.showSettingsAlert();
                     }
-                    view.loadUrl("javascript:startMedia({lat:" + latitude + ",lng:" + longitude + "})");
                 }
             }
         });
