@@ -2,6 +2,7 @@ package com.egovlabura;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.annotation.TargetApi;
 import android.content.ActivityNotFoundException;
@@ -17,6 +18,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.webkit.ConsoleMessage;
 import android.webkit.PermissionRequest;
@@ -40,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     public ValueCallback<Uri[]> uploadMessage;
     public static final int REQUEST_SELECT_FILE = 100;
     private final static int FILECHOOSER_RESULTCODE = 1;
+    SwipeRefreshLayout mySwipeRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +50,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getSupportActionBar().hide();
         setContentView(R.layout.activity_main);
+
+        mySwipeRefreshLayout = (SwipeRefreshLayout)this.findViewById(R.id.swipeContainer);
 
         spinner = (ProgressBar)findViewById(R.id.progressBar);
 
@@ -63,11 +68,24 @@ public class MainActivity extends AppCompatActivity {
         {
             init();
         }
+
+
     }
 
     void init()
     {
         myWebView = (WebView) findViewById(R.id.webview);
+        mySwipeRefreshLayout.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        spinner.setVisibility(View.VISIBLE);
+                        myWebView.reload();
+                        mySwipeRefreshLayout.setRefreshing(false);
+                        spinner.setVisibility(View.GONE);
+                    }
+                }
+        );
         myWebView.addJavascriptInterface(new JavaScriptInterface(this), "Android");
         myWebView.getSettings().setJavaScriptEnabled(true);
         myWebView.getSettings().setAllowFileAccessFromFileURLs(true);
@@ -194,6 +212,17 @@ public class MainActivity extends AppCompatActivity {
             }
 
 
+        });
+
+        myWebView.getViewTreeObserver().addOnScrollChangedListener(new ViewTreeObserver.OnScrollChangedListener() {
+            @Override
+            public void onScrollChanged() {
+                if (myWebView.getScrollY() == 0) {
+                    mySwipeRefreshLayout.setEnabled(true);
+                } else {
+                    mySwipeRefreshLayout.setEnabled(false);
+                }
+            }
         });
 
         myWebView.loadUrl("https://layanan.labura.go.id");
