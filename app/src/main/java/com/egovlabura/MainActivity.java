@@ -136,6 +136,18 @@ public class MainActivity extends AppCompatActivity {
                         gps.showSettingsAlert();
                     }
                 }
+
+                if(
+                        url.contains("google") ||
+                        url.contains("facebook") ||
+                        url.contains("instagram") ||
+                        url.contains("youtube") ||
+                        url.contains("telegram")
+                ) {
+                    Uri location = Uri.parse(url);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, location);
+                    startActivity(intent);
+                }
             }
         });
         myWebView.setWebChromeClient(new WebChromeClient() {
