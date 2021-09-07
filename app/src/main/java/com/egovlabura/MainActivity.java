@@ -98,9 +98,25 @@ public class MainActivity extends AppCompatActivity {
             boolean pageStarted = false;
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String urlNewString) {
-                spinner.setVisibility(View.VISIBLE);
-                view.loadUrl(urlNewString);
-                return true;
+                if(
+                        urlNewString.contains("google") ||
+                                urlNewString.contains("facebook") ||
+                                urlNewString.contains("instagram") ||
+                                urlNewString.contains("youtube") ||
+                                urlNewString.contains("t.me") ||
+                                urlNewString.contains("telegram")
+                ) {
+                    Uri location = Uri.parse(urlNewString);
+                    Intent intent = new Intent(Intent.ACTION_VIEW, location);
+                    startActivity(intent);
+                    return false;
+                }
+                else
+                {
+                    spinner.setVisibility(View.VISIBLE);
+                    view.loadUrl(urlNewString);
+                }
+                return false;
             }
 
             @Override
@@ -118,35 +134,27 @@ public class MainActivity extends AppCompatActivity {
                     spinner.setVisibility(View.GONE);
                 pageStarted = false;
                 if(url.contains("https://absensi-ng.labura.go.id/absen/wajah")) {
-                    GPSTracker gps = new GPSTracker(MainActivity.this);
-                    Location location;
-                    // Check if GPS enabled
-                    if(gps.canGetLocation()) {
-                        location = gps.getLocation();
-                        if(location.isFromMockProvider())
-                            Toast.makeText(MainActivity.this, "Error Code Mock Location", Toast.LENGTH_LONG).show();
-                        else
-                        {
-                            latitude = gps.getLatitude();
-                            longitude = gps.getLongitude();
+                    try {
+                        GPSTracker gps = new GPSTracker(MainActivity.this);
+                        Location location;
+                        // Check if GPS enabled
+                        if(gps.canGetLocation()) {
+                            location = gps.getLocation();
+                            if(location.isFromMockProvider())
+                                Toast.makeText(MainActivity.this, "Error Code Mock Location", Toast.LENGTH_LONG).show();
+                            else
+                            {
+                                latitude = gps.getLatitude();
+                                longitude = gps.getLongitude();
 //                            Toast.makeText(MainActivity.this, "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
-                            view.loadUrl("javascript:startMedia({lat:" + latitude + ",lng:" + longitude + "})");
+                                view.loadUrl("javascript:startMedia({lat:" + latitude + ",lng:" + longitude + "})");
+                            }
+                        } else {
+                            gps.showSettingsAlert();
                         }
-                    } else {
-                        gps.showSettingsAlert();
+                    }catch (Exception e){
+                        Toast.makeText(MainActivity.this, "Error GPS Service. Silahkan Hubungi Administrator", Toast.LENGTH_LONG).show();
                     }
-                }
-
-                if(
-                        url.contains("google") ||
-                        url.contains("facebook") ||
-                        url.contains("instagram") ||
-                        url.contains("youtube") ||
-                        url.contains("telegram")
-                ) {
-                    Uri location = Uri.parse(url);
-                    Intent intent = new Intent(Intent.ACTION_VIEW, location);
-                    startActivity(intent);
                 }
             }
         });
