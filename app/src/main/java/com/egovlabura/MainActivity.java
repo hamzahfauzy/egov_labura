@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.PendingIntent;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -29,10 +31,15 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
 
+    static MainActivity instance;
     private String TAG = "WV";
     WebView myWebView;
     GPSTracker gps;
@@ -43,6 +50,13 @@ public class MainActivity extends AppCompatActivity {
     public static final int REQUEST_SELECT_FILE = 100;
     private final static int FILECHOOSER_RESULTCODE = 1;
     SwipeRefreshLayout mySwipeRefreshLayout;
+    LocationRequest locationReq;
+    FusedLocationProviderClient fusedLocationProviderClient;
+
+    public static MainActivity getInstance()
+    {
+        return instance;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,29 +65,35 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().hide();
         setContentView(R.layout.activity_main);
 
-        mySwipeRefreshLayout = (SwipeRefreshLayout)this.findViewById(R.id.swipeContainer);
+        mySwipeRefreshLayout = (SwipeRefreshLayout) this.findViewById(R.id.swipeContainer);
 
-        spinner = (ProgressBar)findViewById(R.id.progressBar);
+        spinner = (ProgressBar) findViewById(R.id.progressBar);
+
+        instance = this;
 
         int PERMISSION_ALL = 1;
         String[] PERMISSIONS = {
-                android.Manifest.permission.ACCESS_FINE_LOCATION,
-                android.Manifest.permission.CAMERA
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.CAMERA
         };
 
         if (!hasPermissions(this, PERMISSIONS)) {
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
-        }
-        else
-        {
+        } else {
             init();
         }
 
 
     }
 
-    void init()
-    {
+    void init() {
+        locationRequest();
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        fusedLocationProviderClient.requestLocationUpdates(locationReq, getPendingIntent());
+
         myWebView = (WebView) findViewById(R.id.webview);
         mySwipeRefreshLayout.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
@@ -116,6 +136,29 @@ public class MainActivity extends AppCompatActivity {
                     spinner.setVisibility(View.VISIBLE);
                     view.loadUrl(urlNewString);
                 }
+
+                if(urlNewString.contains("https://absensi-ng.labura.go.id/absen/wajah")) {
+                    try {
+                        GPSTracker gps = new GPSTracker(MainActivity.this);
+                        Location location;
+                        // Check if GPS enabled
+                        if(gps.canGetLocation()) {
+                            location = gps.getLocation();
+                            if(location.isFromMockProvider())
+                                Toast.makeText(MainActivity.this, "Error Code Mock Location", Toast.LENGTH_LONG).show();
+                            else
+                            {
+                                latitude = gps.getLatitude();
+                                longitude = gps.getLongitude();
+                                Toast.makeText(MainActivity.this, "Lokasi Anda - \nLat: " + latitude + "\nLong: " + longitude + "\nAkurasi: " + gps.getLocation().getAccuracy(), Toast.LENGTH_LONG).show();
+                            }
+                        } else {
+                            gps.showSettingsAlert();
+                        }
+                    }catch (Exception e){
+                        Toast.makeText(MainActivity.this, "Error GPS Service. Silahkan Hubungi Administrator", Toast.LENGTH_LONG).show();
+                    }
+                }
                 return false;
             }
 
@@ -134,27 +177,7 @@ public class MainActivity extends AppCompatActivity {
                     spinner.setVisibility(View.GONE);
                 pageStarted = false;
                 if(url.contains("https://absensi-ng.labura.go.id/absen/wajah")) {
-                    try {
-                        GPSTracker gps = new GPSTracker(MainActivity.this);
-                        Location location;
-                        // Check if GPS enabled
-                        if(gps.canGetLocation()) {
-                            location = gps.getLocation();
-                            if(location.isFromMockProvider())
-                                Toast.makeText(MainActivity.this, "Error Code Mock Location", Toast.LENGTH_LONG).show();
-                            else
-                            {
-                                latitude = gps.getLatitude();
-                                longitude = gps.getLongitude();
-//                            Toast.makeText(MainActivity.this, "Your Location is - \nLat: " + latitude + "\nLong: " + longitude, Toast.LENGTH_LONG).show();
-                                view.loadUrl("javascript:startMedia({lat:" + latitude + ",lng:" + longitude + "})");
-                            }
-                        } else {
-                            gps.showSettingsAlert();
-                        }
-                    }catch (Exception e){
-                        Toast.makeText(MainActivity.this, "Error GPS Service. Silahkan Hubungi Administrator", Toast.LENGTH_LONG).show();
-                    }
+                    view.loadUrl("javascript:startMedia({lat:" + latitude + ",lng:" + longitude + "})");
                 }
             }
         });
@@ -192,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
 
 
             // For Lollipop 5.0+ Devices
-            public boolean onShowFileChooser(WebView mWebView, ValueCallback<Uri[]> filePathCallback, WebChromeClient.FileChooserParams fileChooserParams)
+            public boolean onShowFileChooser(WebView mWebView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams)
             {
                 if (uploadMessage != null) {
                     uploadMessage.onReceiveValue(null);
@@ -309,4 +332,23 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "Failed to Upload Image", Toast.LENGTH_LONG).show();
     }
 
+    public void locationRequest()
+    {
+        locationReq = new LocationRequest();
+        locationReq.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationReq.setInterval(1500);
+        locationReq.setFastestInterval(750);
+        locationReq.setSmallestDisplacement(10f);
+    }
+
+    public PendingIntent getPendingIntent() {
+        Intent intent = new Intent(this, GpsService.class);
+        intent.setAction("1");
+        return PendingIntent.getBroadcast(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    public void showUpdateLocation(String txt)
+    {
+        Toast.makeText(this,txt,Toast.LENGTH_LONG).show();
+    }
 }
