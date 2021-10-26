@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
         mySwipeRefreshLayout = (SwipeRefreshLayout) this.findViewById(R.id.swipeContainer);
 
         spinner = (ProgressBar) findViewById(R.id.progressBar);
+        spinner.setVisibility(View.GONE);
 
         instance = this;
 
@@ -99,10 +100,10 @@ public class MainActivity extends AppCompatActivity {
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
-                        spinner.setVisibility(View.VISIBLE);
+                        //spinner.setVisibility(View.VISIBLE);
                         myWebView.reload();
                         mySwipeRefreshLayout.setRefreshing(false);
-                        spinner.setVisibility(View.GONE);
+                        //spinner.setVisibility(View.GONE);
                     }
                 }
         );
@@ -113,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
         myWebView.getSettings().setMediaPlaybackRequiresUserGesture(false);
         myWebView.getSettings().setAllowFileAccess(true);
         myWebView.getSettings().setAllowContentAccess(true);
+        myWebView.getSettings().setDomStorageEnabled(true);
 
         myWebView.setWebViewClient(new WebViewClient(){
             boolean pageStarted = false;
@@ -124,62 +126,28 @@ public class MainActivity extends AppCompatActivity {
                                 urlNewString.contains("instagram") ||
                                 urlNewString.contains("youtube") ||
                                 urlNewString.contains("t.me") ||
+                                urlNewString.contains("layanan.labura.go.id") ||
+                                urlNewString.contains("tg:resolve?domain=egovlabura") ||
                                 urlNewString.contains("telegram")
                 ) {
                     Uri location = Uri.parse(urlNewString);
                     Intent intent = new Intent(Intent.ACTION_VIEW, location);
                     startActivity(intent);
-                    return false;
+                    return true;
                 }
                 else
                 {
-                    spinner.setVisibility(View.VISIBLE);
+                    //spinner.setVisibility(View.VISIBLE);
                     view.loadUrl(urlNewString);
-                }
-
-                if(urlNewString.contains("https://absensi-ng.labura.go.id/absen/wajah")) {
-                    try {
-                        GPSTracker gps = new GPSTracker(MainActivity.this);
-                        Location location;
-                        // Check if GPS enabled
-                        if(gps.canGetLocation()) {
-                            location = gps.getLocation();
-                            if(location.isFromMockProvider())
-                                Toast.makeText(MainActivity.this, "Error Code Mock Location", Toast.LENGTH_LONG).show();
-                            else
-                            {
-                                latitude = gps.getLatitude();
-                                longitude = gps.getLongitude();
-                                Toast.makeText(MainActivity.this, "Lokasi Anda - \nLat: " + latitude + "\nLong: " + longitude + "\nAkurasi: " + gps.getLocation().getAccuracy(), Toast.LENGTH_LONG).show();
-                            }
-                        } else {
-                            gps.showSettingsAlert();
-                        }
-                    }catch (Exception e){
-                        Toast.makeText(MainActivity.this, "Error GPS Service. Silahkan Hubungi Administrator", Toast.LENGTH_LONG).show();
-                    }
                 }
                 return false;
             }
 
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
-//                spinner.setVisibility(View.VISIBLE);
-                pageStarted = true;
                 Log.d("WebView", "onPageStarted " + url);
-                //SHOW LOADING IF IT ISNT ALREADY VISIBLE
             }
 
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                // do your stuff here
-                if(pageStarted)
-                    spinner.setVisibility(View.GONE);
-                pageStarted = false;
-                if(url.contains("https://absensi-ng.labura.go.id/absen/wajah")) {
-                    view.loadUrl("javascript:startMedia({lat:" + latitude + ",lng:" + longitude + "})");
-                }
-            }
         });
         myWebView.setWebChromeClient(new WebChromeClient() {
             // Grant permissions for cam
@@ -268,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        myWebView.loadUrl("https://layanan.labura.go.id");
+        myWebView.loadUrl("file:///android_asset/index.html");
     }
 
     @Override
@@ -277,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
             switch (keyCode) {
                 case KeyEvent.KEYCODE_BACK:
                     if (myWebView.canGoBack()) {
-                        spinner.setVisibility(View.VISIBLE);
+//                        spinner.setVisibility(View.VISIBLE);
                         myWebView.goBack();
                     } else {
                         finish();

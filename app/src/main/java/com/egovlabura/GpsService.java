@@ -23,7 +23,7 @@ public class GpsService extends BroadcastReceiver {
                 {
                     Location location = result.getLastLocation();
                     try {
-                        MainActivity.getInstance().showUpdateLocation("Lokasi Anda \nLat : " + location.getLatitude() + "\nLng : " + location.getLongitude());
+                        // MainActivity.getInstance().showUpdateLocation("Lokasi Anda \nLat : " + location.getLatitude() + "\nLng : " + location.getLongitude());
                     }catch (Exception e){
 
                     }

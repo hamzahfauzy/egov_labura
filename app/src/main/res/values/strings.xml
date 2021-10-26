@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">EGOV Labura</string>
+    <string name="app_name">eGov Labura</string>
     <string name="title_activity_camera">FullscreenActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
