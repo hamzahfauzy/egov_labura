@@ -121,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String urlNewString) {
                 if(
+                        urlNewString.contains("http") ||
                         urlNewString.contains("google") ||
                                 urlNewString.contains("facebook") ||
                                 urlNewString.contains("instagram") ||
