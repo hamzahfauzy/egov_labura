@@ -6,6 +6,8 @@ import android.location.Location;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
+import com.google.firebase.messaging.FirebaseMessaging;
+
 public class JavaScriptInterface {
     Context mContext;
     GPSTracker gps;
@@ -66,6 +68,18 @@ public class JavaScriptInterface {
         }
 
         return ret;
+    }
+
+    @JavascriptInterface
+    public void subscribeTo(String user_id)
+    {
+        FirebaseMessaging.getInstance().subscribeToTopic("topic_"+user_id);
+    }
+
+    @JavascriptInterface
+    public void unsubscribeFrom(String user_id)
+    {
+        FirebaseMessaging.getInstance().unsubscribeFromTopic("topic_"+user_id);
     }
 
     @JavascriptInterface
