@@ -24,6 +24,7 @@ import android.webkit.ConsoleMessage;
 import android.webkit.PermissionRequest;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
@@ -117,9 +118,14 @@ public class MainActivity extends AppCompatActivity {
         myWebView.getSettings().setDomStorageEnabled(true);
 
         myWebView.setWebViewClient(new WebViewClient(){
-            boolean pageStarted = false;
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String urlNewString) {
+            public void doUpdateVisitedHistory(WebView view, String url, boolean isReload ){
+//                Log.d(TAG, url);
+            }
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                String urlNewString = request.getUrl().toString();
+                Log.d(TAG, urlNewString);
                 if(
                         urlNewString.contains("http") ||
                         urlNewString.contains("google") ||
@@ -138,10 +144,13 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else
                 {
-                    //spinner.setVisibility(View.VISIBLE);
-                    view.loadUrl(urlNewString);
+                    // spinner.setVisibility(View.VISIBLE);
+                    // view.loadUrl(urlNewString);
+                    Intent intent = new Intent(MainActivity.this, MainActivity.class);
+                    intent.putExtra("url",urlNewString);
+                    startActivity(intent);
+                    return true;
                 }
-                return false;
             }
 
             @Override
@@ -237,7 +246,30 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        myWebView.loadUrl("file:///android_asset/index.html");
+        Intent gi = getIntent();
+        String _url = "file:///android_asset/index.html";
+
+        if (gi.getExtras() != null) {
+            try {
+                String extraUrl = gi.getExtras().getString("url");
+                if(extraUrl != null)
+                {
+                    if(extraUrl.contains("file:///android_asset/index.html"))
+                        _url = extraUrl;
+                    else
+                    {
+                        Uri location = Uri.parse(extraUrl);
+                        Intent intent = new Intent(Intent.ACTION_VIEW, location);
+                        startActivity(intent);
+                    }
+                }
+            }catch (Exception e){
+                _url = "file:///android_asset/index.html#/notifications";
+                Log.d(TAG, e.toString());
+            }
+        }
+
+        myWebView.loadUrl(_url);
     }
 
     @Override

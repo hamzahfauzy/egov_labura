@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "238445636375",
-    "project_id": "egovtest-3c158",
-    "storage_bucket": "egovtest-3c158.appspot.com"
+    "project_number": "751110924593",
+    "project_id": "egov-labura",
+    "storage_bucket": "egov-labura.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:238445636375:android:8f3a2a30766aeb46226552",
+        "mobilesdk_app_id": "1:751110924593:android:3cfab60be01f856283a810",
         "android_client_info": {
           "package_name": "com.egovlabura"
         }
       },
       "oauth_client": [
         {
-          "client_id": "238445636375-n42u4vg4inp996hidl1qg47nl6o4j4dj.apps.googleusercontent.com",
+          "client_id": "751110924593-qs6ft3fipmjeu007ji90sdnjjf4slj16.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDtffiQH7ko74egK2B4bI0thtGzcSZTWeE"
+          "current_key": "AIzaSyC6KK0aEe4n9Ug6G6HLz_8s9CQd1YJSrGU"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "238445636375-n42u4vg4inp996hidl1qg47nl6o4j4dj.apps.googleusercontent.com",
+              "client_id": "751110924593-qs6ft3fipmjeu007ji90sdnjjf4slj16.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
