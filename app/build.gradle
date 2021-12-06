@@ -8,10 +8,10 @@ android {
 
     defaultConfig {
         applicationId "com.egovlabura"
-        minSdkVersion 26
+        minSdkVersion 19
         targetSdkVersion 30
-        versionCode 14
-        versionName '9.4'
+        versionCode 15
+        versionName '10.1'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
